@@ -13,4 +13,4 @@ ulimit -s unlimited
 module load languages/anaconda3/2019.07-3.6.5-tflow-1.14
 pip install keras --user
 
-python main.py
+python train.py
