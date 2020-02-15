@@ -1,12 +1,14 @@
 from model import *
 from data import *
 
-data_gen_args = dict(rotation_range=0.2,
-                     width_shift_range=0.05,
-                     height_shift_range=0.05,
-                     shear_range=0.05,
-                     zoom_range=0.05,
+data_gen_args = dict(rotation_range=2,
+                     width_shift_range=0.02,
+                     height_shift_range=0.02,
+                     shear_range=2,
+                     zoom_range=0.02,
+                     brightness_range=[0.9,1.1],
                      horizontal_flip=True,
+                     vertical_flip=True,
                      fill_mode='nearest')
 
 myGene = trainGenerator(2, 'data/train', 'image','label', data_gen_args, save_to_dir = None)
