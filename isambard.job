@@ -15,8 +15,13 @@ echo Time is `date`
 echo Directory is `pwd`
 echo PBS job ID is $PBS_JOBID
 
-module load anaconda/3
-module load cudnn/7.0
-module load cudatoolkit/9.1.85
+# Silence Keras CPU warnings
+export TF_CPP_MIN_LOG_LEVEL=2
 
+# Load modules
+module load cudatoolkit
+module load anaconda
+module load cuda10.1/toolkit/10.1.243
+
+# Train model
 time python train.py
