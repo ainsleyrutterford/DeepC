@@ -1,5 +1,7 @@
 from model import *
 from data import *
+from tensorflow.python.client import device_lib
+print(device_lib.list_local_devices())
 
 data_gen_args = dict(rotation_range=2,
                      width_shift_range=0.02,

@@ -1,6 +1,6 @@
 from __future__ import print_function
-from keras.preprocessing.image import ImageDataGenerator
-import numpy as np 
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+import numpy as np
 import os
 import glob
 import skimage.io as io
