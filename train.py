@@ -19,7 +19,7 @@ tensorboard = TensorBoard(log_dir=f'logs/{time()}')
 
 model = unet()
 model_checkpoint = ModelCheckpoint('isambard.hdf5', monitor='loss', verbose=1, save_best_only=True)
-model.fit_generator(myGene, steps_per_epoch=2000, epochs=5, callbacks=[tensorboard])
+model.fit_generator(myGene, steps_per_epoch=2000, epochs=5, callbacks=[tensorboard, model_checkpoint])
 
 num_tests = 6
 testGene = testGenerator("data/test", num_image=num_tests)
