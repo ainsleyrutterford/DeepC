@@ -1,3 +1,3 @@
-# A Keras implementation of U-Net
+# Keras U-Net
 
-This will be used as the starting point for a PyTorch implementation of a U-Net based architecture.
+A simple implementation of U-Net in Keras.
