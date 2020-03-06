@@ -53,7 +53,7 @@ def test_generator(test_path, num_image=30, target_size=(256, 256)):
         image = io.imread(os.path.join(test_path, "%d.png" % i), as_gray=True)
         image = image / 255
         image = trans.resize(image, target_size)
-        image = np.reshape(image, (1,) + image.shape)
+        image = np.reshape(image, (1,) + image.shape + (1,))
         yield image
 
 def save_result(save_path, npyfile):

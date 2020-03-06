@@ -21,7 +21,7 @@ model = unet()
 model_checkpoint = ModelCheckpoint('isambard.hdf5', monitor='loss', verbose=1, save_best_only=True)
 model.fit_generator(train_gen, steps_per_epoch=2000, epochs=5, callbacks=[tensorboard, model_checkpoint])
 
-num_tests = 6
+num_tests = 75
 test_gen = test_generator("data/test", num_image=num_tests)
 results = model.predict_generator(test_gen, num_tests, verbose=1)
 save_result("data/test", results)
