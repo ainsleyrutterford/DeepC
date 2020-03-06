@@ -24,4 +24,4 @@ model.fit_generator(train_gen, steps_per_epoch=2000, epochs=5, callbacks=[tensor
 num_tests = 6
 test_gen = test_generator("data/test", num_image=num_tests)
 results = model.predict_generator(test_gen, num_tests, verbose=1)
-saveResult("data/test", results)
+save_result("data/test", results)
