@@ -1,18 +1,8 @@
+import loss
 import numpy as np
 from tensorflow.keras.models import *
 from tensorflow.keras.layers import *
 from tensorflow.keras.optimizers import *
-from tensorflow.keras import backend as keras
-
-def dice_coef(y_true, y_pred):
-    smooth = 1
-    y_true_f = keras.flatten(y_true)
-    y_pred_f = keras.flatten(y_pred)
-    intersection = keras.sum(y_true_f * y_pred_f)
-    return (2.0 * intersection + smooth) / (keras.sum(y_true_f) + keras.sum(y_pred_f) + smooth)
-
-def dice_coef_loss(y_true, y_pred):
-    return 1 - dice_coef(y_true, y_pred)
 
 def unet(pretrained_weights=None, input_size=(256, 256, 1)):
     inputs = Input(input_size)
@@ -58,8 +48,9 @@ def unet(pretrained_weights=None, input_size=(256, 256, 1)):
 
     model = Model(inputs=inputs, outputs=conv10)
 
-    model.compile(optimizer=Adam(lr=1e-4), loss="binary_crossentropy", metrics=["accuracy"])
-    # model.compile(optimizer = Adam(lr = 1e-4), loss = dice_coef_loss, metrics = ['accuracy'])
+    model.compile(optimizer=Adam(lr = 1e-4), loss="binary_crossentropy", metrics=["accuracy"])
+    # model.compile(optimizer=Adam(lr = 1e-4), loss=loss.dice_coef_loss, metrics=["accuracy"])
+    # model.compile(optimizer=Adam(lr = 1e-4), loss=loss.binary_focal_loss(), metrics=["accuracy"])
 
     if pretrained_weights:
         model.load_weights(pretrained_weights)
