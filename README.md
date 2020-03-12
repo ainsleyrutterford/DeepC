@@ -1,6 +1,6 @@
 # CNN architectures for Coral Density Analysis
 
-A simple implementation of 2D SegNet, 2D U-Net and 3D U-Net architectures in Keras.
+Simple implementations of 2D SegNet, 2D U-Net and 3D U-Net architectures in Keras.
 
 ## Prerequisits
 
