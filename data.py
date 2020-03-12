@@ -4,7 +4,7 @@ import os
 import skimage.io as io
 import skimage.transform as trans
 from skimage import img_as_ubyte
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from keras.preprocessing.image import ImageDataGenerator
 
 def adjust_data(image, mask):
     if np.max(image) > 1:

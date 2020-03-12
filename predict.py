@@ -1,5 +1,5 @@
 import argparse
-from model import *
+from models import *
 from data import *
 
 parser = argparse.ArgumentParser()

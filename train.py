@@ -1,7 +1,7 @@
 from data import *
-from model import *
+from models import *
 from time import time
-from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
+from keras.callbacks import TensorBoard, ModelCheckpoint
 
 data_gen_args = dict(rotation_range=2,
                      width_shift_range=0.02,
@@ -17,7 +17,7 @@ train_gen = train_generator(2, 'data/train', 'image','label', data_gen_args, sav
 
 tensorboard = TensorBoard(log_dir=f'logs/{time()}')
 
-model = unet()
+model = segnet()
 model_checkpoint = ModelCheckpoint('isambard.hdf5', monitor='loss', verbose=1, save_best_only=True)
 model.fit_generator(train_gen, steps_per_epoch=2000, epochs=5, callbacks=[tensorboard, model_checkpoint])
 
