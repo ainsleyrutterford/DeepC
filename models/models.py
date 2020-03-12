@@ -1,9 +1,9 @@
-import loss
+import models.loss as loss
 import numpy as np
 from keras.models import *
 from keras.layers import *
 from keras.optimizers import *
-from layers import MaxPoolingWithArgmax2D, MaxUnpooling2D
+from models.layers import MaxPoolingWithArgmax2D, MaxUnpooling2D
 
 
 def unet(pretrained_weights=None, input_size=(256, 256, 1)):

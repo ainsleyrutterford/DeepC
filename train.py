@@ -1,5 +1,5 @@
 from data import *
-from models import *
+from models.models import *
 from time import time
 from keras.callbacks import TensorBoard, ModelCheckpoint
 
