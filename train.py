@@ -17,7 +17,7 @@ train_gen = train_generator(2, 'data/train', 'image','label', data_gen_args, sav
 
 tensorboard = TensorBoard(log_dir=f'logs/{time()}')
 
-model = segnet()
+model = segnet2D()
 model_checkpoint = ModelCheckpoint('isambard.hdf5', monitor='loss', verbose=1, save_best_only=True)
 model.fit_generator(train_gen, steps_per_epoch=2000, epochs=5, callbacks=[tensorboard, model_checkpoint])
 
