@@ -11,7 +11,7 @@ def compile(arch='unet2D', loss='binary_cross', pretrained_weights=None):
 
     if loss == 'focal':
         model.compile(optimizer=Adam(lr = 1e-4), loss=l.binary_focal_loss(), metrics=["accuracy"])
-    if loss == 'dice_coef_loss':
+    if loss == 'dice':
         model.compile(optimizer=Adam(lr = 1e-4), loss=l.dice_coef_loss, metrics=["accuracy"])
     else:
         model.compile(optimizer=Adam(lr = 1e-4), loss="binary_crossentropy", metrics=["accuracy"])
