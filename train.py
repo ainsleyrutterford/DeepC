@@ -1,7 +1,16 @@
+import argparse
+import models.models as models
 from data import *
-from models.models import *
 from time import time
 from keras.callbacks import TensorBoard, ModelCheckpoint
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--model', type=str, default='unet2D', help='Architecture to use [unet2D | unet3D | segnet2D]')
+parser.add_argument('--epochs', type=int, default=5, help='Number of epochs to train for')
+parser.add_argument('--steps', type=int, default=2000, help='Number of steps per epoch')
+parser.add_argument('--loss', type=str, default='binary_cross', 
+                    help='Loss function to use [binary_cross | focal | dice]')
+args = parser.parse_args()
 
 data_gen_args = dict(rotation_range=2,
                      width_shift_range=0.02,
@@ -17,9 +26,12 @@ train_gen = train_generator(2, 'data/train', 'image','label', data_gen_args, sav
 
 tensorboard = TensorBoard(log_dir=f'logs/{time()}')
 
-model = segnet2D()
+model = models.compile(args.model, args.loss)
 model_checkpoint = ModelCheckpoint('isambard.hdf5', monitor='loss', verbose=1, save_best_only=True)
-model.fit_generator(train_gen, steps_per_epoch=2000, epochs=5, callbacks=[tensorboard, model_checkpoint])
+model.fit_generator(train_gen, 
+                    steps_per_epoch=args.steps, 
+                    epochs=args.epochs, 
+                    callbacks=[tensorboard, model_checkpoint])
 
 num_tests = 75
 test_gen = test_generator("data/test", num_image=num_tests)
