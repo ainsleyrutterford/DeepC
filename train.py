@@ -1,5 +1,5 @@
 import argparse
-import models.models as models
+import models
 from data import *
 from time import time
 from keras.callbacks import TensorBoard, ModelCheckpoint

@@ -1,25 +1,6 @@
-import models.loss as l
-import numpy as np
 from keras.models import *
 from keras.layers import *
-from keras.optimizers import *
 from models.layers import MaxPoolingWithArgmax2D, MaxUnpooling2D
-
-
-def compile(arch='unet2D', loss='binary_cross', pretrained_weights=None):
-    model = globals()[arch]()
-
-    if loss == 'focal':
-        model.compile(optimizer=Adam(lr = 1e-4), loss=l.binary_focal_loss(), metrics=["accuracy"])
-    if loss == 'dice':
-        model.compile(optimizer=Adam(lr = 1e-4), loss=l.dice_coef_loss, metrics=["accuracy"])
-    else:
-        model.compile(optimizer=Adam(lr = 1e-4), loss="binary_crossentropy", metrics=["accuracy"])
-
-    if pretrained_weights:
-        model.load_weights(pretrained_weights)
-
-    return model
 
 
 def unet2D(classes=2, input_size=(256, 256, 1)):
