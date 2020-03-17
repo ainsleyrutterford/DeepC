@@ -17,12 +17,12 @@ data_gen_args = dict(rotation_range=2,
                      height_shift_range=0.02,
                      shear_range=2,
                      zoom_range=0.02,
-                     brightness_range=[0.9,1.1],
+                    #  brightness_range=[0.9,1.1],
                      horizontal_flip=True,
                      vertical_flip=True,
                      fill_mode='nearest')
 
-train_gen = train_generator(2, 'data/train', 'image','label', data_gen_args, save_to_dir=None)
+train_gen = train_generator_3D(2, 'data/train', 'image','label', data_gen_args, save_to_dir=None)
 
 tensorboard = TensorBoard(log_dir=f'logs/{time()}')
 
