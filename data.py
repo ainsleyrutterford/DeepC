@@ -5,7 +5,7 @@ import skimage.io as io
 import skimage.transform as trans
 from skimage import img_as_ubyte
 from keras.preprocessing.image import ImageDataGenerator
-from generator import ImageDataGenerator as ImageDataGenerator3D
+from generator import ImageDataGenerator3D
 
 def adjust_data(image, mask):
     if np.max(image) > 1:
@@ -49,36 +49,22 @@ def train_generator(batch_size, train_path, image_folder, mask_folder, aug_dict,
         image, mask = adjust_data(image, mask)
         yield image, mask
 
-def train_generator_3D(batch_size, train_path, image_folder, mask_folder, aug_dict,
-                       image_color_mode="grayscale", mask_color_mode="grayscale",
-                       image_save_prefix="image", mask_save_prefix="mask", num_class=2,
-                       save_to_dir=None, target_size=(256, 256), seed=1, frames_per_step=4):
-    image_datagen = ImageDataGenerator3D(**aug_dict)
-    mask_datagen = ImageDataGenerator3D(**aug_dict)
-    image_generator = image_datagen.flow_from_directory(train_path,
-                                                        classes=[image_folder],
-                                                        class_mode=None,
-                                                        color_mode=image_color_mode,
-                                                        target_size=target_size,
-                                                        batch_size=batch_size,
-                                                        save_to_dir=save_to_dir,
-                                                        save_prefix=image_save_prefix,
-                                                        seed=seed,
-                                                        frames_per_step=32)
-    mask_generator = mask_datagen.flow_from_directory(train_path,
-                                                      classes=[mask_folder],
-                                                      class_mode=None,
-                                                      color_mode=mask_color_mode,
-                                                      target_size=target_size,
-                                                      batch_size=batch_size,
-                                                      save_to_dir=save_to_dir,
-                                                      save_prefix=mask_save_prefix,
-                                                      seed=seed,
-                                                      frames_per_step=32)
-    train_generator = zip(image_generator, mask_generator)
-    for image, mask in train_generator:
-        image, mask = adjust_data(image, mask)
-        yield image, mask
+def train_generator_3D(batch_size, path, image_folder, mask_folder, aug_dict,
+                       num_frames, target_size=(256, 256)):
+
+    image_mask_datagen = ImageDataGenerator3D(**aug_dict)
+
+    image_mask_generator = image_mask_datagen.flow_from_directory(
+        path,
+        image_folder,
+        mask_folder,
+        target_size,
+        batch_size,
+        num_frames
+    )
+
+    for image in image_mask_generator:
+        yield image, image
 
 def test_generator(test_path, num_image=30, target_size=(256, 256)):
     for i in range(num_image):
