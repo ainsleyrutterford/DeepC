@@ -52,19 +52,29 @@ def train_generator(batch_size, train_path, image_folder, mask_folder, aug_dict,
 def train_generator_3D(batch_size, path, image_folder, mask_folder, aug_dict,
                        num_frames, target_size=(256, 256)):
 
-    image_mask_datagen = ImageDataGenerator3D(**aug_dict)
+    image_datagen = ImageDataGenerator3D(**aug_dict)
+    mask_datagen = ImageDataGenerator3D(**aug_dict)
 
-    image_mask_generator = image_mask_datagen.flow_from_directory(
+    image_generator = image_datagen.flow_from_directory(
         path,
         image_folder,
+        target_size,
+        batch_size,
+        num_frames
+    )
+
+    mask_generator = mask_datagen.flow_from_directory(
+        path,
         mask_folder,
         target_size,
         batch_size,
         num_frames
     )
 
-    for image in image_mask_generator:
-        yield image, image
+    train_generator = zip(image_generator, mask_generator)
+    for image, mask in train_generator:
+        image, mask = adjust_data(image, mask)
+        yield image, mask
 
 def test_generator(test_path, num_image=30, target_size=(256, 256)):
     for i in range(num_image):

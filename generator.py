@@ -2,6 +2,7 @@ import cv2 as cv
 import numpy as np
 import os
 from glob import glob
+from scipy import ndimage
 
 class ImageDataGenerator3D():
 
@@ -18,23 +19,30 @@ class ImageDataGenerator3D():
         self.horizontal_flip = horizontal_flip
         self.vertical_flip = vertical_flip
         self.fill_mode = fill_mode
+    
+    def rotate(self, batch):
+        # batch[0] = ndimage.rotate(batch[0], 2, reshape=False, mode='nearest')
+        # batch[1] = ndimage.rotate(batch[1], 2, reshape=False, mode='nearest')
+        return batch
 
     def augment(self, batch):
-        pass
+        if self.rotation_range != None:
+            batch = self.rotate(batch)
+        return batch
 
-    def flow_from_directory(self, path, image_folder, mask_folder,
-                            target_size, batch_size, num_frames):
+    def flow_from_directory(self, path, folder, target_size, batch_size, num_frames):
         # For i in batch_size, load num_frames images and pack
         # into a num_frames x target_size[0] x target_size[y] x 1
         # numpy array. Then augment using augment(). Then yield
         # the batch_size x num_frames x target_size[0] x
         # target_size[y] x 1 numpy array.
 
-        final_path = os.path.join(path, image_folder, "*.png")
+        final_path = os.path.join(path, folder, "*.png")
         file_names = np.array(sorted(glob(final_path)))
         samples = len(file_names) // num_frames
         file_names = file_names[ : samples * num_frames]
         file_names = file_names.reshape((samples, num_frames))
+        print(f"Found {samples * num_frames} images ({samples} chunks of {num_frames} images).")
         
         batch = np.zeros((batch_size, num_frames, *target_size, 1))
         num_added = 0
@@ -49,4 +57,4 @@ class ImageDataGenerator3D():
                     num_added += 1
                     if num_added == 2:
                         num_added = 0
-                        yield batch
+                        yield self.augment(batch)
