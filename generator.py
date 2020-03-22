@@ -30,7 +30,7 @@ class ImageDataGenerator3D():
             batch = self.rotate(batch)
         return batch
 
-    def flow_from_directory(self, path, folder, target_size, batch_size, num_frames):
+    def flow_from_directory(self, path, folder, target_size, batch_size, num_frames, seed):
         # For i in batch_size, load num_frames images and pack
         # into a num_frames x target_size[0] x target_size[y] x 1
         # numpy array. Then augment using augment(). Then yield
@@ -48,13 +48,18 @@ class ImageDataGenerator3D():
         num_added = 0
 
         while True:
-            for i in np.random.permutation(samples):
+            if seed == None:
+                permutation = range(samples)
+            else:
+                np.random.seed(seed)
+                permutation = np.random.permutation(samples)
+            for i in permutation:
                 for f in range(num_frames):
                     image = cv.imread(file_names[i, f], 0)
                     image = cv.resize(image, target_size)
                     image = np.expand_dims(image, axis=2)
                     batch[num_added, f] = image
-                    num_added += 1
-                    if num_added == 2:
-                        num_added = 0
-                        yield self.augment(batch)
+                num_added += 1
+                if num_added == batch_size:
+                    num_added = 0
+                    yield self.augment(batch)
