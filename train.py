@@ -33,7 +33,7 @@ model.fit_generator(train_gen,
                     epochs=args.epochs, 
                     callbacks=[tensorboard, model_checkpoint])
 
-num_tests = 75
-test_gen = test_generator("data/test", num_image=num_tests)
+num_tests = 36
+test_gen = test_generator_3D("data/test", num_image=num_tests)
 results = model.predict_generator(test_gen, num_tests, verbose=1)
-save_result("data/test", results)
+save_result_3D("data/test", results)

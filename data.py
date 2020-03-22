@@ -50,7 +50,7 @@ def train_generator(batch_size, train_path, image_folder, mask_folder, aug_dict,
         yield image, mask
 
 def train_generator_3D(batch_size, path, image_folder, mask_folder, aug_dict,
-                       num_frames, target_size=(256, 256)):
+                       num_frames, target_size=(256, 256), seed=1):
 
     image_datagen = ImageDataGenerator3D(**aug_dict)
     mask_datagen = ImageDataGenerator3D(**aug_dict)
@@ -60,7 +60,8 @@ def train_generator_3D(batch_size, path, image_folder, mask_folder, aug_dict,
         image_folder,
         target_size,
         batch_size,
-        num_frames
+        num_frames,
+        seed
     )
 
     mask_generator = mask_datagen.flow_from_directory(
@@ -68,7 +69,8 @@ def train_generator_3D(batch_size, path, image_folder, mask_folder, aug_dict,
         mask_folder,
         target_size,
         batch_size,
-        num_frames
+        num_frames,
+        seed
     )
 
     train_generator = zip(image_generator, mask_generator)
@@ -84,7 +86,22 @@ def test_generator(test_path, num_image=30, target_size=(256, 256)):
         image = np.reshape(image, (1,) + image.shape + (1,))
         yield image
 
+def test_generator_3D(test_path, num_image=30, target_size=(256, 256), num_frames=9):
+    image_datagen = ImageDataGenerator3D()
+    image_generator = image_datagen.flow_from_directory(test_path, '', target_size, 1, num_frames, None)
+
+    for i, image_stack in enumerate(image_generator):
+        if i < num_image:
+            image_stack = image_stack / 255
+            yield image_stack
+
 def save_result(save_path, npyfile):
     for i, item in enumerate(npyfile):
         image = item[:, :, 0]
         io.imsave(os.path.join(save_path, "%d_predict.png" % i), img_as_ubyte(image))
+
+def save_result_3D(save_path, npyfile, num_frames=9):
+    for i, item in enumerate(npyfile):
+        for f in range(num_frames):
+            image = item[f, :, :, 0]
+            io.imsave(os.path.join(save_path, f"PREDICTION_{i}_{f}_predict.png"), img_as_ubyte(image))
