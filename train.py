@@ -22,7 +22,10 @@ data_gen_args = dict(rotation_range=2,
                      vertical_flip=True,
                      fill_mode='nearest')
 
-train_gen = train_generator_3D(2, 'data/train', 'image','label', data_gen_args, 9)
+if args.model == 'unet3D':
+    train_gen = train_generator_3D(2, 'data/train', 'image','label', data_gen_args, 9)
+else:
+    train_gen = train_generator(2, 'data/train', 'image','label', data_gen_args)
 
 tensorboard = TensorBoard(log_dir=f'logs/{time()}')
 
@@ -33,7 +36,12 @@ model.fit_generator(train_gen,
                     epochs=args.epochs, 
                     callbacks=[tensorboard, model_checkpoint])
 
-num_tests = 36
-test_gen = test_generator_3D("data/test", num_image=num_tests)
-results = model.predict_generator(test_gen, num_tests, verbose=1)
-save_result_3D("data/test", results)
+num_tests = 324
+if args.model == 'unet3D':
+    test_gen = test_generator_3D("data/test", num_image=num_tests)
+    results = model.predict_generator(test_gen, num_tests, verbose=1)
+    save_result_3D("test", results)
+else:
+    test_gen = test_generator("data/test", num_image=num_tests)
+    results = model.predict_generator(test_gen, num_tests, verbose=1)
+    save_result("test", results)
