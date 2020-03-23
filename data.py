@@ -79,8 +79,9 @@ def train_generator_3D(batch_size, path, image_folder, mask_folder, aug_dict,
         yield image, mask
 
 def test_generator(test_path, num_image=30, target_size=(256, 256)):
+    image_names = sorted(glob.glob(os.path.join(test_path, "*.png")))
     for i in range(num_image):
-        image = io.imread(os.path.join(test_path, "%d.png" % i), as_gray=True)
+        image = io.imread(image_names[i], as_gray=True)
         image = image / 255
         image = trans.resize(image, target_size)
         image = np.reshape(image, (1,) + image.shape + (1,))
@@ -94,6 +95,8 @@ def test_generator_3D(test_path, num_image=30, target_size=(256, 256), num_frame
         if i < num_image:
             image_stack = image_stack / 255
             yield image_stack
+        else:
+            return
 
 def save_result(save_path, npyfile):
     for i, item in enumerate(npyfile):
