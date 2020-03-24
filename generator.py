@@ -19,15 +19,49 @@ class ImageDataGenerator3D():
         self.horizontal_flip = horizontal_flip
         self.vertical_flip = vertical_flip
         self.fill_mode = fill_mode
-    
+        self.seed = None
+
     def rotate(self, batch):
-        # batch[0] = ndimage.rotate(batch[0], 2, reshape=False, mode='nearest')
-        # batch[1] = ndimage.rotate(batch[1], 2, reshape=False, mode='nearest')
+        # This line is to rotate 45 degrees x, y
+        # Change the previews we export to show z, x and see if you can
+        # find the axis that rotate those images. also check if those
+        # rotations significantly slow down training
+        # batch = ndimage.rotate(batch, 45, axes=(2, 3), reshape=False, mode='nearest')
+        return batch
+
+    def shift(self, batch):
+        # batch = ndimage.shift(batch, [0, 0, 20, 0, 0], mode='nearest')
+        return batch
+
+    def flip(self, batch, axis):
+        np.random.seed(self.seed)
+        r = np.random.choice([True, False])
+        if r:
+            batch = np.flip(batch, axis=axis)
+        if self.seed != None:
+            self.seed += 1
+        return batch
+
+    def brightness(self, batch):
+        np.random.seed(self.seed)
+        r = np.random.uniform(self.brightness_range[0], self.brightness_range[1])
+        batch *= r
+        if self.seed != None:
+            self.seed += 1
         return batch
 
     def augment(self, batch):
         if self.rotation_range != None:
             batch = self.rotate(batch)
+        if self.width_shift_range != None:
+            batch = self.shift(batch)
+        if self.brightness_range != None:
+            batch = self.brightness(batch)
+        if self.horizontal_flip != None:
+            batch = self.flip(batch, axis=2)
+            batch = self.flip(batch, axis=1)
+        if self.vertical_flip != None:
+            batch = self.flip(batch, axis=3)
         return batch
 
     def flow_from_directory(self, path, folder, target_size, batch_size, num_frames, seed):
@@ -37,6 +71,7 @@ class ImageDataGenerator3D():
         # the batch_size x num_frames x target_size[0] x
         # target_size[y] x 1 numpy array.
 
+        self.seed = seed
         final_path = os.path.join(path, folder, "*.png")
         file_names = np.array(sorted(glob(final_path)))
         samples = len(file_names) // num_frames
@@ -48,10 +83,10 @@ class ImageDataGenerator3D():
         num_added = 0
 
         while True:
-            if seed == None:
+            if self.seed == None:
                 permutation = range(samples)
             else:
-                np.random.seed(seed)
+                np.random.seed(self.seed)
                 permutation = np.random.permutation(samples)
             for i in permutation:
                 for f in range(num_frames):
