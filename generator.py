@@ -22,15 +22,15 @@ class ImageDataGenerator3D():
         self.seed = None
 
     def rotate(self, batch):
-        # This line is to rotate 45 degrees x, y
-        # Change the previews we export to show z, x and see if you can
-        # find the axis that rotate those images. also check if those
-        # rotations significantly slow down training
-        # batch = ndimage.rotate(batch, 45, axes=(2, 3), reshape=False, mode='nearest')
-        return batch
-
-    def shift(self, batch):
-        # batch = ndimage.shift(batch, [0, 0, 20, 0, 0], mode='nearest')
+        np.random.seed(self.seed)
+        r = np.random.randint(-self.rotation_range, self.rotation_range)
+        np.random.seed(self.seed)
+        ninety = np.random.choice([True, False])
+        if ninety:
+            r += 90
+        batch = ndimage.rotate(batch, r, axes=(2, 3), reshape=False, mode='nearest')
+        if self.seed != None:
+            self.seed += 1
         return batch
 
     def flip(self, batch, axis):
@@ -53,8 +53,6 @@ class ImageDataGenerator3D():
     def augment(self, batch):
         if self.rotation_range != None:
             batch = self.rotate(batch)
-        if self.width_shift_range != None:
-            batch = self.shift(batch)
         if self.brightness_range != None:
             batch = self.brightness(batch)
         if self.horizontal_flip != None:
@@ -65,12 +63,6 @@ class ImageDataGenerator3D():
         return batch
 
     def flow_from_directory(self, path, folder, target_size, batch_size, num_frames, seed):
-        # For i in batch_size, load num_frames images and pack
-        # into a num_frames x target_size[0] x target_size[y] x 1
-        # numpy array. Then augment using augment(). Then yield
-        # the batch_size x num_frames x target_size[0] x
-        # target_size[y] x 1 numpy array.
-
         self.seed = seed
         final_path = os.path.join(path, folder, "*.png")
         file_names = np.array(sorted(glob(final_path)))

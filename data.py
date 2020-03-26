@@ -76,24 +76,6 @@ def train_generator_3D(batch_size, path, image_folder, mask_folder, aug_dict,
     train_generator = zip(image_generator, mask_generator)
     for image, mask in train_generator:
         image, mask = adjust_data(image, mask)
-        io.imsave("augment/image0.png", img_as_ubyte(image[0, 0, :, :, 0]))
-        io.imsave("augment/image1.png", img_as_ubyte(image[0, 1, :, :, 0]))
-        io.imsave("augment/image2.png", img_as_ubyte(image[0, 2, :, :, 0]))
-        io.imsave("augment/image3.png", img_as_ubyte(image[0, 3, :, :, 0]))
-        io.imsave("augment/image4.png", img_as_ubyte(image[0, 4, :, :, 0]))
-        io.imsave("augment/image5.png", img_as_ubyte(image[0, 5, :, :, 0]))
-        io.imsave("augment/image6.png", img_as_ubyte(image[0, 6, :, :, 0]))
-        io.imsave("augment/image7.png", img_as_ubyte(image[0, 7, :, :, 0]))
-        io.imsave("augment/image8.png", img_as_ubyte(image[0, 8, :, :, 0]))
-        io.imsave("augment/mask0.png", img_as_ubyte(mask[0, 0, :, :, 0]))
-        io.imsave("augment/mask1.png", img_as_ubyte(mask[0, 1, :, :, 0]))
-        io.imsave("augment/mask2.png", img_as_ubyte(mask[0, 2, :, :, 0]))
-        io.imsave("augment/mask3.png", img_as_ubyte(mask[0, 3, :, :, 0]))
-        io.imsave("augment/mask4.png", img_as_ubyte(mask[0, 4, :, :, 0]))
-        io.imsave("augment/mask5.png", img_as_ubyte(mask[0, 5, :, :, 0]))
-        io.imsave("augment/mask6.png", img_as_ubyte(mask[0, 6, :, :, 0]))
-        io.imsave("augment/mask7.png", img_as_ubyte(mask[0, 7, :, :, 0]))
-        io.imsave("augment/mask8.png", img_as_ubyte(mask[0, 8, :, :, 0]))
         yield image, mask
 
 def test_generator(test_path, num_image=30, target_size=(256, 256)):
