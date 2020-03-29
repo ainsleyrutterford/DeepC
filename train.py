@@ -1,6 +1,6 @@
 import argparse
 import models
-from data import *
+import data
 from time import time
 from keras.callbacks import TensorBoard, ModelCheckpoint
 
@@ -23,14 +23,18 @@ data_gen_args = dict(rotation_range=2,
                      fill_mode='nearest')
 
 if args.model == 'unet3D':
-    train_gen = train_generator_3D(2, 'data/train', 'image','label', data_gen_args, 9)
+    train_gen = data.train_generator_3D(2, 'data/train', 'image','label', data_gen_args, 9)
 else:
-    train_gen = train_generator(2, 'data/train', 'image','label', data_gen_args)
+    train_gen = data.train_generator(2, 'data/train', 'image','label', data_gen_args)
 
 tensorboard = TensorBoard(log_dir=f'logs/{time()}')
 
+filepath = "saved-model-{epoch:02d}-{val_acc:.2f}.hdf5"
+checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=False, mode='max')
+
 model = models.compile(args.model, args.loss)
-model_checkpoint = ModelCheckpoint('isambard.hdf5', monitor='loss', verbose=1, save_best_only=True)
+checkpoint_name = "isambard-{epoch:02d}.hdf5"
+model_checkpoint = ModelCheckpoint(checkpoint_name, monitor='loss', verbose=1, save_best_only=False)
 model.fit_generator(train_gen, 
                     steps_per_epoch=args.steps, 
                     epochs=args.epochs, 
@@ -38,10 +42,10 @@ model.fit_generator(train_gen,
 
 num_tests = 324
 if args.model == 'unet3D':
-    test_gen = test_generator_3D("data/test", num_image=num_tests)
+    test_gen = data.test_generator_3D("data/test/image", num_image=num_tests)
     results = model.predict_generator(test_gen, num_tests, verbose=1)
-    save_result_3D("test", results)
+    data.save_result_3D("test", results)
 else:
-    test_gen = test_generator("data/test", num_image=num_tests)
+    test_gen = data.test_generator("data/test/image", num_image=num_tests)
     results = model.predict_generator(test_gen, num_tests, verbose=1)
-    save_result("test", results)
+    data.save_result("test", results)
