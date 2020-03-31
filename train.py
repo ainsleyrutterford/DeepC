@@ -29,9 +29,6 @@ else:
 
 tensorboard = TensorBoard(log_dir=f'logs/{time()}')
 
-filepath = "saved-model-{epoch:02d}-{val_acc:.2f}.hdf5"
-checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=False, mode='max')
-
 model = models.compile(args.model, args.loss)
 checkpoint_name = "isambard-{epoch:02d}.hdf5"
 model_checkpoint = ModelCheckpoint(checkpoint_name, monitor='loss', verbose=1, save_best_only=False)
@@ -40,7 +37,7 @@ model.fit_generator(train_gen,
                     epochs=args.epochs, 
                     callbacks=[tensorboard, model_checkpoint])
 
-num_tests = 324
+num_tests = 76
 if args.model == 'unet3D':
     test_gen = data.test_generator_3D("data/test/image", num_image=num_tests)
     results = model.predict_generator(test_gen, num_tests, verbose=1)
