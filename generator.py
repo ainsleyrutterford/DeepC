@@ -51,15 +51,15 @@ class ImageDataGenerator3D():
         return batch
 
     def augment(self, batch):
-        if self.rotation_range != None:
-            batch = self.rotate(batch)
-        if self.brightness_range != None:
-            batch = self.brightness(batch)
-        if self.horizontal_flip != None:
-            batch = self.flip(batch, axis=2)
-            batch = self.flip(batch, axis=1)
-        if self.vertical_flip != None:
-            batch = self.flip(batch, axis=3)
+        # if self.rotation_range != None:
+        #     batch = self.rotate(batch)
+        # if self.brightness_range != None:
+        #     batch = self.brightness(batch)
+        # if self.horizontal_flip != None:
+        #     batch = self.flip(batch, axis=2)
+        #     batch = self.flip(batch, axis=1)
+        # if self.vertical_flip != None:
+        #     batch = self.flip(batch, axis=3)
         return batch
 
     def flow_from_directory(self, path, folder, target_size, batch_size, num_frames, seed):
