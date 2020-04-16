@@ -5,7 +5,7 @@ import skimage.io as io
 import skimage.transform as trans
 from skimage import img_as_ubyte
 from keras.preprocessing.image import ImageDataGenerator
-from generator import ImageDataGenerator3D
+from generator import ImageDataGenerator3D, LabelDataGenerator2D
 
 def adjust_data(image, mask):
     if np.max(image) > 1:
@@ -53,7 +53,7 @@ def train_generator_3D(batch_size, path, image_folder, mask_folder, aug_dict,
                        num_frames, target_size=(256, 256), seed=1):
 
     image_datagen = ImageDataGenerator3D(**aug_dict)
-    mask_datagen = ImageDataGenerator3D(**aug_dict)
+    mask_datagen = LabelDataGenerator2D(**aug_dict)
 
     image_generator = image_datagen.flow_from_directory(
         path,
