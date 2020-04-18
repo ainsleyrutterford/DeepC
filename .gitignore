@@ -3,3 +3,6 @@ __pycache__/
 OUT
 *.hdf5
 data/
+augment/
+test/
+logs/
