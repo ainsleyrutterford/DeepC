@@ -6,3 +6,4 @@ data/
 augment/
 test/
 logs/
+hausdorff.so
