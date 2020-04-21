@@ -3,7 +3,8 @@ from keras.layers import *
 from models.layers import MaxPoolingWithArgmax2D, MaxUnpooling2D
 
 
-def unet2D(classes=2, input_size=(256, 256, 1)):
+def unet2D(classes=2, size=256):
+    input_size = (size, size, 1)
     inputs = Input(input_size)
     conv1 = Conv2D(64, 3, activation="relu", padding="same", kernel_initializer="he_normal")(inputs)
     conv1 = Conv2D(64, 3, activation="relu", padding="same", kernel_initializer="he_normal")(conv1)
@@ -52,7 +53,8 @@ def unet2D(classes=2, input_size=(256, 256, 1)):
     return Model(inputs=inputs, outputs=conv10)
 
 
-def unet3D(classes=2, input_size=(9, 256, 256, 1)):
+def unet3D(classes=2, size=256):
+    input_size = (9, size, size, 1)
     inputs = Input(input_size)
     conv1 = Conv3D(4, 3, activation="relu", padding="same", kernel_initializer="he_normal")(inputs)
     conv1 = Conv3D(4, 3, activation="relu", padding="same", kernel_initializer="he_normal")(conv1)
@@ -109,7 +111,8 @@ def unet3D(classes=2, input_size=(9, 256, 256, 1)):
     return Model(inputs=inputs, outputs=conv10)
 
 
-def segnet2D(classes=2, input_size=(256, 256, 1)):
+def segnet2D(classes=2, size=256):
+    input_size = (size, size, 1)
     inputs = Input(input_size)
 
     conv1 = Conv2D(32, 3, activation="relu", padding="same")(inputs)

@@ -1,13 +1,14 @@
 import argparse
 import models
 import data
-from time import time
+from datetime import datetime
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', type=str, default='unet2D', help='Architecture to use [unet2D | unet3D | segnet2D]')
 parser.add_argument('--epochs', type=int, default=5, help='Number of epochs to train for')
 parser.add_argument('--steps', type=int, default=2000, help='Number of steps per epoch')
+parser.add_argument('--size', type=int, default=256, help='Size to reshape the images to when training')
 parser.add_argument('--loss', type=str, default='binary_cross', 
                     help='Loss function to use [binary_cross | focal | dice]')
 args = parser.parse_args()
@@ -26,13 +27,14 @@ if args.model == 'unet3D':
     train_gen = data.train_generator_3D(2, 'data/2.5D/train', 'image','label', data_gen_args, 9)
     val_gen = data.train_generator_3D(2, 'data/2.5D/test', 'image','label', dict(), 9)
 else:
-    train_gen = data.train_generator(2, 'data/train', 'image','label', data_gen_args)
-    val_gen = data.train_generator(2, 'data/test', 'image','label', dict())
+    train_gen = data.train_generator(2, 'data/train', 'image','label', data_gen_args, target_size=(args.size, args.size))
+    val_gen = data.train_generator(2, 'data/test', 'image','label', dict(), target_size=(args.size, args.size))
 
-tensorboard = TensorBoard(log_dir=f'logs/{time()}')
+time = datetime.now().strftime("%d-%m-%Y_%H:%M:%S")
+tensorboard = TensorBoard(log_dir=f'logs/{time}')
 es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
 
-model = models.compile(args.model, args.loss)
+model = models.compile(args.model, args.loss, size=args.size)
 checkpoint_name = "isambard-{epoch:02d}.hdf5"
 model_checkpoint = ModelCheckpoint(checkpoint_name, monitor='loss', verbose=1, save_best_only=False)
 model.fit_generator(train_gen, 
@@ -48,6 +50,6 @@ if args.model == 'unet3D':
     results = model.predict_generator(test_gen, num_tests, verbose=1)
     data.save_result("test", results)
 else:
-    test_gen = data.test_generator("data/test/image", num_image=num_tests)
+    test_gen = data.test_generator("data/test/image", num_image=num_tests, target_size=(args.size, args.size))
     results = model.predict_generator(test_gen, num_tests, verbose=1)
     data.save_result("test", results)
