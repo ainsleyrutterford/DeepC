@@ -8,12 +8,12 @@ parser.add_argument('--size', type=int, default=256, help='Size to reshape the i
 parser.add_argument('--lr', type=float, default=0.00005, help='Learning rate')
 parser.add_argument('--batch', type=int, default=2, help='Batch size')
 parser.add_argument('--loss', type=str, default='binary_cross', help='Loss function [binary_cross | focal | dice]')
-parser.add_argument('--quiet', action='store_true', help='Remove TensorFlow startup messages and warnings')
+parser.add_argument('--verbose', action='store_true', help='Show TensorFlow startup messages and warnings')
 parser.add_argument('--dir', type=str, default='data/', help='Data directory')
 parser.add_argument('--name', type=str, default='unet', help='Name to be used for TensorBoard logs')
 args = parser.parse_args()
 
-if args.quiet:
+if not args.verbose:
     import os
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
     import tensorflow as tf
