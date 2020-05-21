@@ -5,6 +5,9 @@ import cv2 as cv
 from ctypes import CDLL
 import ctypes
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+import tensorflow as tf
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 from skimage import morphology
 from tqdm import tqdm
 
@@ -40,30 +43,16 @@ def get_accuracy(folder, tests, weights):
         size = np.size(image)
         skel = np.zeros(image.shape, np.uint8)
 
-        # Get a Cross Shaped Kernel
-        element = cv.getStructuringElement(cv.MORPH_CROSS, (3, 3))
+        image[image == 255] = 1
 
-        image[0, :] = 0; image[255, :] = 0; image[:, 0] = 0; image[:, 255] = 0
-
-        # Repeat steps 2-4
-        while cv.countNonZero(image) != 0:
-            #Step 2: Open the image
-            open = cv.morphologyEx(image, cv.MORPH_OPEN, element)
-            #Step 3: Substract open from the original image
-            temp = cv.subtract(image, open)
-            #Step 4: Erode the original image and refine the skeleton
-            eroded = cv.erode(image, element)
-            skel = cv.bitwise_or(skel, temp)
-            image = eroded.copy()
-
-        processed = morphology.remove_small_objects(skel.astype(bool), min_size=6, connectivity=2).astype(int)
-
-        # black out pixels
-        skel[np.where(processed == 0)] = 0
+        skel = morphology.skeletonize(image)
+        skel = skel.astype(int) * 255
 
         image_boundaries = list(np.array(list(np.where(skel == 255))).T.flatten())
-
         label_boundaries = list(np.array(list(np.where(label == 255))).T.flatten())
+
+        if (len(image_boundaries) == 0):
+            image_boundaries = [0, 0]
 
         c_image_boundaries = (ctypes.c_int * len(image_boundaries))(*image_boundaries)
         c_label_boundaries = (ctypes.c_int * len(label_boundaries))(*label_boundaries)
@@ -71,7 +60,11 @@ def get_accuracy(folder, tests, weights):
         C.hausdorff.restype = ctypes.c_double
         accuracies[i] = C.hausdorff(c_image_boundaries, len(image_boundaries),
                                     c_label_boundaries, len(label_boundaries))
-                                    
+
+        # if tests == 66:
+        #     cv.imwrite(f"skel/{i}_skel.png", np.array(skel))
+        #     print(i, accuracies[i])
+
     return np.mean(accuracies)
 
 epochs = 20
@@ -80,8 +73,8 @@ accuracies = np.zeros(epochs)
 val_accuracies = np.zeros(epochs)
 
 for e in tqdm(range(epochs)):
-    accuracies[e] = get_accuracy("data/train", 224, f"isambard-{e+1:02d}.hdf5")
-    val_accuracies[e] = get_accuracy("data/test", 76, f"isambard-{e+1:02d}.hdf5")
+    accuracies[e] = get_accuracy("data/train", 322, f"isambard-{e+1:02d}.hdf5")
+    val_accuracies[e] = get_accuracy("data/test", 66, f"isambard-{e+1:02d}.hdf5")
 
-print(accuracies)
-print(val_accuracies)
+print(list(accuracies))
+print(list(val_accuracies))
