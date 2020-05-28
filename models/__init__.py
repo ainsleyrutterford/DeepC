@@ -2,8 +2,8 @@ import models.models as M
 import models.losses as L
 from keras.optimizers import Adam, SGD
 
-def compile(arch='unet2D', loss='binary_cross', pretrained_weights=None, size=256, lr=0.00005):
-    model = getattr(M, arch)(size=size)
+def compile(arch='unet2D', loss='binary_cross', pretrained_weights=None, size=256, lr=0.00005, abl=False):
+    model = getattr(M, arch)(size=size, ablated=abl)
 
     if loss == 'focal':
         model.compile(optimizer=Adam(lr=lr), loss=L.binary_focal_loss(), metrics=["accuracy"])
