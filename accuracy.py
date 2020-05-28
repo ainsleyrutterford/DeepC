@@ -1,13 +1,29 @@
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--model', type=str, default='unet2D', help='Architecture [unet2D | unet3D | segnet2D]')
+parser.add_argument('--epochs', type=int, default=20, help='Number of epochs to test')
+parser.add_argument('--size', type=int, default=256, help='Size to reshape the images to when training')
+parser.add_argument('--train_samples', type=int, default=322, help='Number of training samples')
+parser.add_argument('--val_samples', type=int, default=10, help='Number of validation samples')
+parser.add_argument('--verbose', action='store_true', help='Show TensorFlow startup messages and warnings')
+parser.add_argument('--ablated', action='store_true', help='Use ablated architecture')
+parser.add_argument('--dir', type=str, default='data', help='Data directory')
+parser.add_argument('--weights', type=str, default='checkpoint', help='Weights files prefix')
+args = parser.parse_args()
+
+if not args.verbose:
+    import os
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+    import tensorflow as tf
+    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+
 import models
 import data
 import numpy as np
 import cv2 as cv
 from ctypes import CDLL
 import ctypes
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-import tensorflow as tf
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 from skimage import morphology
 from tqdm import tqdm
 
@@ -23,7 +39,7 @@ else:
 def get_accuracy(folder, tests, weights):
     image_gen = data.test_generator(f"{folder}/image", num_image=tests)
     label_gen = data.test_generator(f"{folder}/label", num_image=tests)
-    model = models.compile("unet2D", "binary_crossentropy", weights)
+    model = models.compile(arch=args.model, pretrained_weights=weights, size=args.size, abl=args.ablated)
     results = model.predict_generator(image_gen, tests, verbose=0)
 
     accuracies = np.zeros(tests)
@@ -38,10 +54,6 @@ def get_accuracy(folder, tests, weights):
         label *= 255
         label = label.astype(np.uint8)
         _, label = cv.threshold(label, 127, 255, cv.THRESH_BINARY)
-
-        # Step 1: Create an empty skeleton
-        size = np.size(image)
-        skel = np.zeros(image.shape, np.uint8)
 
         image[image == 255] = 1
 
@@ -67,14 +79,12 @@ def get_accuracy(folder, tests, weights):
 
     return np.mean(accuracies)
 
-epochs = 20
+accuracies = np.zeros(args.epochs)
+val_accuracies = np.zeros(args.epochs)
 
-accuracies = np.zeros(epochs)
-val_accuracies = np.zeros(epochs)
-
-for e in tqdm(range(epochs)):
-    accuracies[e] = get_accuracy("data/train", 322, f"isambard-{e+1:02d}.hdf5")
-    val_accuracies[e] = get_accuracy("data/test", 66, f"isambard-{e+1:02d}.hdf5")
+for e in tqdm(range(args.epochs)):
+    accuracies[e] = get_accuracy(f"{args.dir}/train", args.train_samples, f"{args.weights}-{e+1:02d}.hdf5")
+    val_accuracies[e] = get_accuracy(f"{args.dir}/test", args.val_samples, f"{args.weights}-{e+1:02d}.hdf5")
 
 print(list(accuracies))
 print(list(val_accuracies))
