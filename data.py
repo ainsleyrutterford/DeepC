@@ -160,19 +160,51 @@ def train_generator_3D(batch_size, path, image_folder, label_folder, aug_dict,
 
 
 def test_generator(test_path, num_image=30, target_size=(256, 256)):
+    """
+    Create a generator that yields single 2D images with the correct tensor
+    shape to be passed into the network.
+
+    Args:
+        test_path: the test data directory.
+        num_image: the number of images to test.
+        target_size: the size to reshape the images to during augmentation.
+    Yields:
+        image: a single image tensor of shape (1, y, x, 1).
+    """
+
+    # Find all .png images in the specified directory.
     image_names = sorted(glob.glob(os.path.join(test_path, "*.png")))
+
+    # Only yield num_images images.
     for i in range(num_image):
         image = io.imread(image_names[i], as_gray=True)
         image = image / 255
         image = trans.resize(image, target_size)
+        # Add a dimension for the batch size (1) and a dimension for the
+        # number of channels which is also 1 since the images
+        # are grayscale.
         image = np.reshape(image, (1,) + image.shape + (1,))
         yield image
 
 
 def test_generator_3D(test_path, num_image=30, target_size=(256, 256), num_frames=9):
-    image_datagen = ImageDataGenerator3D()
-    image_generator = image_datagen.flow_from_directory(test_path, '', target_size, 1, num_frames, None)
+    """
+    Create a generator that yields num_frames 2D images at once (can also be thought of as
+    a 3D chunk of data) with the correct tensor shape to be passed into the network.
 
+    Args:
+        test_path: the test data directory.
+        num_image: the number of images to test.
+        target_size: the size to reshape the images to during augmentation.
+        num_frames: the number of 2D images that compose a 3D training sample.
+    Yields:
+        image_stack: a num_frames image stack tensor of shape (1, z, y, x, 1).
+    """
+
+    image_datagen = ImageDataGenerator3D()
+    image_generator = image_datagen.flow_from_directory(test_path, "", target_size, 1, num_frames, None)
+
+    # Only yield num_images image stacks.
     for i, image_stack in enumerate(image_generator):
         if i < num_image:
             image_stack = image_stack / 255
@@ -182,13 +214,30 @@ def test_generator_3D(test_path, num_image=30, target_size=(256, 256), num_frame
 
 
 def save_result(save_path, npyfile):
+    """
+    Save the predictions made by the network to the path specified.
+
+    Args:
+        save_path: the directory to save the images to.
+        npyfile: the npyfile containing the results.
+    """
+
     for i, item in enumerate(npyfile):
         image = item[:, :, 0]
-        io.imsave(os.path.join(save_path, "%d_predict.png" % i), img_as_ubyte(image))
+        io.imsave(os.path.join(save_path, f"{i}_predict.png"), img_as_ubyte(image))
 
 
 def save_result_3D(save_path, npyfile, num_frames=9):
+    """
+    Save the predictions made by the network to the path specified.
+
+    Args:
+        save_path: the directory to save the images to.
+        npyfile: the npyfile containing the results.
+        num_frames: the number of 2D images that compose a 3D sample.
+    """
+
     for i, item in enumerate(npyfile):
         for f in range(num_frames):
             image = item[f, :, :, 0]
-            io.imsave(os.path.join(save_path, f"PREDICTION_{i}_{f}_predict.png"), img_as_ubyte(image))
+            io.imsave(os.path.join(save_path, f"{i}_{f}_predict.png"), img_as_ubyte(image))
