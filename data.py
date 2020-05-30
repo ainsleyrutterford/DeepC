@@ -20,6 +20,7 @@ def adjust_data(image, label):
         image: (arr) the adjusted N dimensional image array.
         label: (arr) the adjusted N dimensional label array
     """
+    
     if np.max(image) > 1:
         image = image / 255
         label = label / 255
