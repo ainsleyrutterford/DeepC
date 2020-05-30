@@ -119,9 +119,11 @@ accuracies = np.zeros(args.epochs)
 val_accuracies = np.zeros(args.epochs)
 
 # Work out the accuracy for all weight files saved at each epoch.
-for e in tqdm(range(args.epochs)):
+for e in tqdm(range(18,args.epochs)):
     accuracies[e] = get_accuracy(f"{args.dir}/train", args.train_samples, f"{args.weights}-{e+1:02d}.hdf5")
     val_accuracies[e] = get_accuracy(f"{args.dir}/test", args.val_samples, f"{args.weights}-{e+1:02d}.hdf5")
 
-print(list(accuracies))
-print(list(val_accuracies))
+print(f"Accuracies achieved over {args.epochs} epochs:")
+print(list((90 - accuracies) / 90 * 100))
+print(f"Validation accuracies achieved over {args.epochs} epochs:")
+print(list((90 - val_accuracies) / 90 * 100))
