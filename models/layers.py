@@ -3,6 +3,9 @@ from keras.layers import *
 from keras.engine import Layer
 import keras.backend as K
 
+# These classes and methods are copied from ykamikawa's Keras SegNet implementation:
+# https://github.com/ykamikawa/tf-keras-SegNet
+
 class MaxPoolingWithArgmax2D(Layer):
 
     def __init__(
