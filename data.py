@@ -14,11 +14,11 @@ def adjust_data(image, label):
     is thresholded so it can only contain 0s or 1s.
 
     Args:
-        image: an N dimensional array.
-        label: an N dimensional array.
+        image: (arr) an N dimensional array.
+        label: (arr) an N dimensional array.
     Returns:
-        image: the adjusted N dimensional image array.
-        label: the adjusted N dimensional label array
+        image: (arr) the adjusted N dimensional image array.
+        label: (arr) the adjusted N dimensional label array
     """
     if np.max(image) > 1:
         image = image / 255
@@ -40,24 +40,24 @@ def train_generator(batch_size, train_path, image_folder, label_folder, aug_dict
     labels generated, set the save_to_dir to the path to a directory.
 
     Args:
-        batch_size: the size of the batches to generate.
-        train_path: the data directory.
-        image_folder: the name of the image folder.
-        label_folder: the name of the label folder.
-        aug_dict: a dictionary containing the transformations allowed
+        batch_size: (int) the size of the batches to generate.
+        train_path: (str) the data directory.
+        image_folder: (str) the name of the image folder.
+        label_folder: (str) the name of the label folder.
+        aug_dict: (dict) a dictionary containing the transformations allowed
             during augmentation.
-        image_color_mode: the color mode that the images are stored in.
-        label_color_mode: the color mode that the labels are stored in.
-        image_save_prefix: the prefix that the saved images will have.
-        label_save_prefix: the prefix that the saved labels will have.
-        save_to_dir: if not None it specifies the directory to save
+        image_color_mode: (str) the color mode that the images are stored in.
+        label_color_mode: (str) the color mode that the labels are stored in.
+        image_save_prefix: (str) the prefix that the saved images will have.
+        label_save_prefix: (str) the prefix that the saved labels will have.
+        save_to_dir: (str | None) if not None it specifies the directory to save
             the augmented images and labels to.
-        target_size: the size to reshape the images to during augmentation.
-        seed: the seed used to specify the transformations the two
+        target_size: (int, int) the size to reshape the images to during augmentation.
+        seed: (int) the seed used to specify the transformations the two
             generators will randomly apply.
     Yields:
-        image: the augmented image tensor of shape (batch_size, y, x, channels).
-        label: the augmented label tensor of shape (batch_size, y, x, channels).
+        image: (arr) the augmented image tensor of shape (batch_size, y, x, channels).
+        label: (arr) the augmented label tensor of shape (batch_size, y, x, channels).
     """
 
     image_datagen = ImageDataGenerator(**aug_dict)
@@ -111,19 +111,19 @@ def train_generator_3D(batch_size, path, image_folder, label_folder, aug_dict,
     be merged into one method.
 
     Args:
-        batch_size: the size of the batches to generate.
-        path: the data directory.
-        image_folder: the name of the image folder.
-        label_folder: the name of the label folder.
-        aug_dict: a dictionary containing the transformations allowed
+        batch_size: (int) the size of the batches to generate.
+        path: (str) the data directory.
+        image_folder: (str) the name of the image folder.
+        label_folder: (str) the name of the label folder.
+        aug_dict: (dict) a dictionary containing the transformations allowed
             during augmentation.
-        num_frames: the number of 2D images that compose a 3D training sample.
-        target_size: the size to reshape the images to during augmentation.
-        seed: the seed used to specify the transformations the two
+        num_frames: (int) the number of 2D images that compose a 3D training sample.
+        target_size: (int, int) the size to reshape the images to during augmentation.
+        seed: (int) the seed used to specify the transformations the two
             generators will randomly apply.
     Yields:
-        image: the augmented image tensor of shape (batch_size, z, y, x, channels).
-        label: the augmented label tensor of shape (batch_size, z, y, x, channels).
+        image: (arr) the augmented image tensor of shape (batch_size, z, y, x, channels).
+        label: (arr) the augmented label tensor of shape (batch_size, z, y, x, channels).
     """
 
     image_datagen = ImageDataGenerator3D(**aug_dict)
@@ -165,11 +165,11 @@ def test_generator(test_path, num_image=30, target_size=(256, 256)):
     shape to be passed into the network.
 
     Args:
-        test_path: the test data directory.
-        num_image: the number of images to test.
-        target_size: the size to reshape the images to during augmentation.
+        test_path: (str) the test data directory.
+        num_image: (int) the number of images to test.
+        target_size: (int, int) the size to reshape the images to during augmentation.
     Yields:
-        image: a single image tensor of shape (1, y, x, 1).
+        image: (arr) a single image tensor of shape (1, y, x, 1).
     """
 
     # Find all .png images in the specified directory.
@@ -193,12 +193,12 @@ def test_generator_3D(test_path, num_image=30, target_size=(256, 256), num_frame
     a 3D chunk of data) with the correct tensor shape to be passed into the network.
 
     Args:
-        test_path: the test data directory.
-        num_image: the number of images to test.
-        target_size: the size to reshape the images to during augmentation.
-        num_frames: the number of 2D images that compose a 3D training sample.
+        test_path: (str) the test data directory.
+        num_image: (int) the number of images to test.
+        target_size: (int, int) the size to reshape the images to during augmentation.
+        num_frames: (int) the number of 2D images that compose a 3D training sample.
     Yields:
-        image_stack: a num_frames image stack tensor of shape (1, z, y, x, 1).
+        image_stack: (arr) a num_frames image stack tensor of shape (1, z, y, x, 1).
     """
 
     image_datagen = ImageDataGenerator3D()
@@ -218,8 +218,8 @@ def save_result(save_path, npyfile):
     Save the predictions made by the network to the path specified.
 
     Args:
-        save_path: the directory to save the images to.
-        npyfile: the npyfile containing the results.
+        save_path: (str) the directory to save the images to.
+        npyfile: (obj) the npyfile containing the results.
     """
 
     for i, item in enumerate(npyfile):
@@ -232,9 +232,9 @@ def save_result_3D(save_path, npyfile, num_frames=9):
     Save the predictions made by the network to the path specified.
 
     Args:
-        save_path: the directory to save the images to.
-        npyfile: the npyfile containing the results.
-        num_frames: the number of 2D images that compose a 3D sample.
+        save_path: (str) the directory to save the images to.
+        npyfile: (obj) the npyfile containing the results.
+        num_frames: (int) the number of 2D images that compose a 3D sample.
     """
 
     for i, item in enumerate(npyfile):
