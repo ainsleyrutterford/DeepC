@@ -5,10 +5,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--model", type=str, default="unet2D", help="Architecture [unet2D | unet3D | segnet2D]")
 parser.add_argument("--image", type=str, default="test.png", help="Image to predict")
 parser.add_argument("--size", type=int, default=256, help="Size to reshape the images to when training")
-parser.add_argument("--weights", type=str, default="isambard-20.hdf5", help="Weights file to load")
+parser.add_argument("--weights", type=str, default="checkpoint-20.hdf5", help="Weights file to load")
 parser.add_argument("--verbose", action="store_true", help="Show TensorFlow startup messages and warnings")
 parser.add_argument("--ablated", action="store_true", help="Use ablated architecture")
-parser.add_argument("--dir", type=str, default="data/", help="Data directory")
 args = parser.parse_args()
 
 # If the --verbose argument is not supplied, suppress all of the TensorFlow startup messages.
