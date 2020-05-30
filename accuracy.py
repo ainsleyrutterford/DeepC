@@ -58,7 +58,7 @@ def get_accuracy(folder, tests, weights):
     label_gen = data.test_generator(f"{folder}/label", num_image=tests)
 
     # Compile the model using a compile() method defined in models/__init__.py.
-    model = models.compile(arch=args.model, pretrained_weights=weights, size=args.size, abl=args.ablated)
+    model = models.compile(arch=args.model, weights=weights, size=args.size, abl=args.ablated)
 
     results = model.predict_generator(image_gen, tests, verbose=0)
 

@@ -8,7 +8,7 @@ parser.add_argument("--steps", type=int, default=500, help="Number of batches se
 parser.add_argument("--size", type=int, default=256, help="Size to reshape the images to when training")
 parser.add_argument("--lr", type=float, default=0.00005, help="Learning rate")
 parser.add_argument("--batch", type=int, default=2, help="Batch size")
-parser.add_argument("--loss", type=str, default="binary_cross", help="Loss function [binary_cross | focal | dice]")
+parser.add_argument("--loss", type=str, default="binary_cross", help="Loss function [binary_cross | focal]")
 parser.add_argument("--verbose", action="store_true", help="Show TensorFlow startup messages and warnings")
 parser.add_argument("--ablated", action="store_true", help="Use ablated architecture")
 parser.add_argument("--dir", type=str, default="data", help="Data directory")

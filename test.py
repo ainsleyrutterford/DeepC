@@ -24,7 +24,7 @@ from datetime import datetime
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
 
 # Compile the model using a compile() method defined in models/__init__.py.
-model = models.compile(arch=args.model, pretrained_weights=args.weights, size=args.size, abl=args.ablated)
+model = models.compile(arch=args.model, weights=args.weights, size=args.size, abl=args.ablated)
 
 # Process the images in the test set and save the results to the test/ directory.
 if args.model == "unet3D":

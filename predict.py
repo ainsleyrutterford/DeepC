@@ -44,7 +44,7 @@ def reshape(input):
     return input
 
 # Compile the model using a compile() method defined in models/__init__.py.
-model = models.compile(arch=args.model, pretrained_weights=args.weights, size=args.size, abl=args.ablated)
+model = models.compile(arch=args.model, weights=args.weights, size=args.size, abl=args.ablated)
 
 stride = 56
 
