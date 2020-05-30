@@ -7,54 +7,130 @@ from skimage import img_as_ubyte
 from keras.preprocessing.image import ImageDataGenerator
 from generator import ImageDataGenerator3D, LabelDataGenerator2D
 
-def adjust_data(image, mask):
+
+def adjust_data(image, label):
+    """
+    Adjust an image label pair to contain values between 0 and 1. The label
+    is thresholded so it can only contain 0s or 1s.
+
+    Args:
+        image: an N dimensional array.
+        label: an N dimensional array.
+    Returns:
+        image: the adjusted N dimensional image array.
+        label: the adjusted N dimensional label array
+    """
     if np.max(image) > 1:
         image = image / 255
-        mask = mask / 255
-        mask[mask > 0.5] = 1
-        mask[mask <= 0.5] = 0
-    return image, mask
+        label = label / 255
+        label[label > 0.5] = 1
+        label[label <= 0.5] = 0
+    return image, label
 
-def train_generator(batch_size, train_path, image_folder, mask_folder, aug_dict,
-                    image_color_mode="grayscale", mask_color_mode="grayscale",
-                    image_save_prefix="image", mask_save_prefix="mask", num_class=2,
+
+def train_generator(batch_size, train_path, image_folder, label_folder, aug_dict,
+                    image_color_mode="grayscale", label_color_mode="grayscale",
+                    image_save_prefix="image", label_save_prefix="label",
                     save_to_dir=None, target_size=(256, 256), seed=1):
     """
-    can generate image and mask at the same time use the same seed for image_datagen
-    and mask_datagen to ensure the transformation for image and mask is the same if
-    you want to visualize the results of generator, set save_to_dir = "your path"
-    """
-    image_datagen = ImageDataGenerator(**aug_dict)
-    mask_datagen = ImageDataGenerator(**aug_dict)
-    image_generator = image_datagen.flow_from_directory(train_path,
-                                                        classes=[image_folder],
-                                                        class_mode=None,
-                                                        color_mode=image_color_mode,
-                                                        target_size=target_size,
-                                                        batch_size=batch_size,
-                                                        save_to_dir=save_to_dir,
-                                                        save_prefix=image_save_prefix,
-                                                        seed=seed)
-    mask_generator = mask_datagen.flow_from_directory(train_path,
-                                                      classes=[mask_folder],
-                                                      class_mode=None,
-                                                      color_mode=mask_color_mode,
-                                                      target_size=target_size,
-                                                      batch_size=batch_size,
-                                                      save_to_dir=save_to_dir,
-                                                      save_prefix=mask_save_prefix,
-                                                      seed=seed)
-    train_generator = zip(image_generator, mask_generator)
-    for image, mask in train_generator:
-        image, mask = adjust_data(image, mask)
-        yield image, mask
+    Create a generator that yields image label pairs. Two separate generators are
+    created that use the same random seed to allow them to augment the images
+    and corresponding labels with the same transformations. These generators
+    are then zipped into a single generator. To save the augmented images and
+    labels generated, set the save_to_dir to the path to a directory.
 
-def train_generator_3D(batch_size, path, image_folder, mask_folder, aug_dict,
+    Args:
+        batch_size: the size of the batches to generate.
+        train_path: the data directory.
+        image_folder: the name of the image folder.
+        label_folder: the name of the label folder.
+        aug_dict: a dictionary containing the transformations allowed
+            during augmentation.
+        image_color_mode: the color mode that the images are stored in.
+        label_color_mode: the color mode that the labels are stored in.
+        image_save_prefix: the prefix that the saved images will have.
+        label_save_prefix: the prefix that the saved labels will have.
+        save_to_dir: if not None it specifies the directory to save
+            the augmented images and labels to.
+        target_size: the size to reshape the images to during augmentation.
+        seed: the seed used to specify the transformations the two
+            generators will randomly apply.
+    Yields:
+        image: the augmented image tensor of shape (batch_size, y, x, channels).
+        label: the augmented label tensor of shape (batch_size, y, x, channels).
+    """
+
+    image_datagen = ImageDataGenerator(**aug_dict)
+    label_datagen = ImageDataGenerator(**aug_dict)
+
+    # The same seed argument is used when the image and label generators are
+    # created to ensure that the same transformations are applied to both.
+    image_generator = image_datagen.flow_from_directory(
+        train_path,
+        classes=[image_folder],
+        class_mode=None,
+        color_mode=image_color_mode,
+        target_size=target_size,
+        batch_size=batch_size,
+        save_to_dir=save_to_dir,
+        save_prefix=image_save_prefix,
+        seed=seed
+    )
+
+    label_generator = label_datagen.flow_from_directory(
+        train_path,
+        classes=[label_folder],
+        class_mode=None,
+        color_mode=label_color_mode,
+        target_size=target_size,
+        batch_size=batch_size,
+        save_to_dir=save_to_dir,
+        save_prefix=label_save_prefix,
+        seed=seed
+    )
+
+    # Zip the two generators into one.
+    train_generator = zip(image_generator, label_generator)
+
+    # Before yielding the image label pair, pass them through the
+    # adjust_data() method defined above.
+    for image, label in train_generator:
+        image, label = adjust_data(image, label)
+        yield image, label
+
+
+def train_generator_3D(batch_size, path, image_folder, label_folder, aug_dict,
                        num_frames, target_size=(256, 256), seed=1):
+    """
+    Create a generator that yields 3D image label pairs. Two separate generators are
+    created that use the same random seed to allow them to augment the images
+    and corresponding labels with the same transformations. These generators
+    are then zipped into a single generator. To save the augmented images and
+    labels generated, set the save_to_dir to the path to a directory. This
+    method is similar to the train_generator method and these could eventually
+    be merged into one method.
+
+    Args:
+        batch_size: the size of the batches to generate.
+        path: the data directory.
+        image_folder: the name of the image folder.
+        label_folder: the name of the label folder.
+        aug_dict: a dictionary containing the transformations allowed
+            during augmentation.
+        num_frames: the number of 2D images that compose a 3D training sample.
+        target_size: the size to reshape the images to during augmentation.
+        seed: the seed used to specify the transformations the two
+            generators will randomly apply.
+    Yields:
+        image: the augmented image tensor of shape (batch_size, z, y, x, channels).
+        label: the augmented label tensor of shape (batch_size, z, y, x, channels).
+    """
 
     image_datagen = ImageDataGenerator3D(**aug_dict)
-    mask_datagen = LabelDataGenerator2D(**aug_dict)
+    label_datagen = LabelDataGenerator2D(**aug_dict)
 
+    # The same seed argument is used when the image and label generators are
+    # created to ensure that the same transformations are applied to both.
     image_generator = image_datagen.flow_from_directory(
         path,
         image_folder,
@@ -64,19 +140,24 @@ def train_generator_3D(batch_size, path, image_folder, mask_folder, aug_dict,
         seed
     )
 
-    mask_generator = mask_datagen.flow_from_directory(
+    label_generator = label_datagen.flow_from_directory(
         path,
-        mask_folder,
+        label_folder,
         target_size,
         batch_size,
         num_frames,
         seed
     )
 
-    train_generator = zip(image_generator, mask_generator)
-    for image, mask in train_generator:
-        image, mask = adjust_data(image, mask)
-        yield image, mask
+    # Zip the two generators into one.
+    train_generator = zip(image_generator, label_generator)
+
+    # Before yielding the image label pair, pass them through the
+    # adjust_data() method defined above.
+    for image, label in train_generator:
+        image, label = adjust_data(image, label)
+        yield image, label
+
 
 def test_generator(test_path, num_image=30, target_size=(256, 256)):
     image_names = sorted(glob.glob(os.path.join(test_path, "*.png")))
@@ -86,6 +167,7 @@ def test_generator(test_path, num_image=30, target_size=(256, 256)):
         image = trans.resize(image, target_size)
         image = np.reshape(image, (1,) + image.shape + (1,))
         yield image
+
 
 def test_generator_3D(test_path, num_image=30, target_size=(256, 256), num_frames=9):
     image_datagen = ImageDataGenerator3D()
@@ -98,10 +180,12 @@ def test_generator_3D(test_path, num_image=30, target_size=(256, 256), num_frame
         else:
             return
 
+
 def save_result(save_path, npyfile):
     for i, item in enumerate(npyfile):
         image = item[:, :, 0]
         io.imsave(os.path.join(save_path, "%d_predict.png" % i), img_as_ubyte(image))
+
 
 def save_result_3D(save_path, npyfile, num_frames=9):
     for i, item in enumerate(npyfile):
