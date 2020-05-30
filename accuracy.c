@@ -5,7 +5,7 @@ double find_distance(int x1, int y1, int x2, int y2) {
   return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
 }
 
-double hausdorff_single(int* whites, int length, int* whites2, int length2) {
+double euclidean_single(int* whites, int length, int* whites2, int length2) {
   length  /= 2;
   length2 /= 2;
   double distances[length];
@@ -23,9 +23,9 @@ double hausdorff_single(int* whites, int length, int* whites2, int length2) {
   return ave;
 }
 
-double hausdorff(int* whites, int length, int* whites2, int length2) {
-  double one = hausdorff_single(whites, length, whites2, length2);
-  double two = hausdorff_single(whites2, length2, whites, length);
+double euclidean(int* whites, int length, int* whites2, int length2) {
+  double one = euclidean_single(whites, length, whites2, length2);
+  double two = euclidean_single(whites2, length2, whites, length);
   double ans = (one + two) / 2;
   return (one + two) / 2;
 }
