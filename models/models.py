@@ -4,9 +4,29 @@ from models.layers import MaxPoolingWithArgmax2D, MaxUnpooling2D
 
 
 def unet2D(classes=2, size=256, ablated=False):
+    """
+    Define the 2D U-Net architecture. An ablated architecture can be
+    defined if ablated == True. This implementation is based heavily off
+    of zhixuhao's implementation:
+
+    https://github.com/zhixuhao/unet/blob/master/model.py
+
+    Args:
+        classes: (int) the number of classes that the network can predict.
+        size: (int) the x and y dimensions of the input images.
+        ablated: (bool) whether or not an ablated architecture should be
+            defined. The ablated architecture contains no pass-forward
+            of information from blocks in the contracting path to
+            blocks in the expanding path.
+    Returns:
+        model: (Keras Model) returns a Keras model containing the layers
+            as attributes.
+    """
+
     input_size = (size, size, 1)
     inputs = Input(input_size)
 
+    # Contracting path
     conv1 = Conv2D(64, 3, activation="relu", padding="same", kernel_initializer="he_normal")(inputs)
     conv1 = Conv2D(64, 3, activation="relu", padding="same", kernel_initializer="he_normal")(conv1)
     pool1 = MaxPooling2D(pool_size=(2, 2))(conv1)
@@ -24,10 +44,12 @@ def unet2D(classes=2, size=256, ablated=False):
     drop4 = Dropout(0.5)(conv4)
     pool4 = MaxPooling2D(pool_size=(2, 2))(drop4)
 
+    # Bottleneck
     conv5 = Conv2D(1024, 3, activation="relu", padding="same", kernel_initializer="he_normal")(pool4)
     conv5 = Conv2D(1024, 3, activation="relu", padding="same", kernel_initializer="he_normal")(conv5)
     drop5 = Dropout(0.5)(conv5)
 
+    # Expanding path
     up6 = UpSampling2D(size=(2, 2))(drop5)
     up6 = Conv2D(512, 2, activation="relu", padding="same", kernel_initializer="he_normal")(up6)
     if not ablated:
@@ -62,9 +84,22 @@ def unet2D(classes=2, size=256, ablated=False):
 
 
 def unet3D(classes=2, size=256, ablated=False):
+    """
+    Define the 3D U-Net architecture.
+
+    Args:
+        classes: (int) the number of classes that the network can predict.
+        size: (int) the x and y dimensions of the input images.
+        ablated: (bool) not used. Kept for compatability with unet2D().
+    Returns:
+        model: (Keras Model) returns a Keras model containing the layers
+            as attributes.
+    """
+
     input_size = (9, size, size, 1)
     inputs = Input(input_size)
 
+    # Modified 3D contracting path
     conv1 = Conv3D(4, 3, activation="relu", padding="same", kernel_initializer="he_normal")(inputs)
     conv1 = Conv3D(4, 3, activation="relu", padding="same", kernel_initializer="he_normal")(conv1)
     pool1 = MaxPooling3D(pool_size=(1, 2, 2))(conv1)
@@ -87,10 +122,12 @@ def unet3D(classes=2, size=256, ablated=False):
     drop4 = Reshape((32, 32, 288))(drop4)
     pool4 = Reshape((16, 16, 288))(pool4)
 
+    # 2D Bottleneck
     conv5 = Conv2D(1024, 3, activation="relu", padding="same", kernel_initializer="he_normal")(pool4)
     conv5 = Conv2D(1024, 3, activation="relu", padding="same", kernel_initializer="he_normal")(conv5)
     drop5 = Dropout(0.5)(conv5)
 
+    # 2D Expanding path
     up6 = UpSampling2D(size=(2, 2))(drop5)
     up6 = Conv2D(512, 2, activation="relu", padding="same", kernel_initializer="he_normal")(up6)
     merge6 = concatenate([drop4, up6], axis=3)
@@ -120,12 +157,26 @@ def unet3D(classes=2, size=256, ablated=False):
     return Model(inputs=inputs, outputs=conv10)
 
 
-# https://github.com/ykamikawa/tf-keras-SegNet
 def segnet2D(classes=2, size=256, ablated=False):
-    # encoder
+    """
+    Define the 2D SegNet architecture. This implementation is copied from
+    ykamikawa's implementation:
+
+    # https://github.com/ykamikawa/tf-keras-SegNet
+
+    Args:
+        classes: (int) the number of classes that the network can predict.
+        size: (int) the x and y dimensions of the input images.
+        ablated: (bool) not used. Kept for compatability with unet2D().
+    Returns:
+        model: (Keras Model) returns a Keras model containing the layers
+            as attributes.
+    """
+
     input_size = (size, size, 1)
     inputs = Input(input_size)
 
+    # Encoder
     conv_1 = Convolution2D(64, 3, padding="same")(inputs)
     conv_1 = BatchNormalization()(conv_1)
     conv_1 = Activation("relu")(conv_1)
@@ -180,8 +231,7 @@ def segnet2D(classes=2, size=256, ablated=False):
 
     pool_5, mask_5 = MaxPoolingWithArgmax2D((2, 2))(conv_13)
 
-    # decoder
-
+    # Decoder
     unpool_1 = MaxUnpooling2D((2, 2))([pool_5, mask_5])
 
     conv_14 = Convolution2D(512, 3, padding="same")(unpool_1)
