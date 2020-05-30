@@ -63,11 +63,16 @@ tensorboard = TensorBoard(log_dir=f"logs/{args.name}_{time}")
 # validation loss fails to decrease after 10 epochs.
 es = EarlyStopping(monitor="val_loss", mode="min", verbose=1, patience=10)
 
+# Initialise a Keras ModelCheckpoint callback to save the model every epoch regardless of
+# whether the loss decreases or not.
 checkpoint_name = "checkpoint-{epoch:02d}.hdf5"
 model_checkpoint = ModelCheckpoint(checkpoint_name, monitor="loss", verbose=1, save_best_only=False)
 
+# Compile the model using a compile() method defined in models/__init__.py.
 model = models.compile(args.model, args.loss, size=args.size, lr=args.lr, abl=args.ablated)
 
+# Train the model. Since online augmentation is used, the steps_per_epoch specifies how many
+# batches should be processed before an epoch is considered complete.
 model.fit_generator(train_gen, 
                     steps_per_epoch=args.steps,
                     epochs=args.epochs,
@@ -75,11 +80,18 @@ model.fit_generator(train_gen,
                     validation_steps=args.vals,
                     callbacks=[tensorboard, model_checkpoint, es])
 
+# Once the model has been trained, use it to process the images in the test set and save
+# the results to the test/ directory.
 if args.model == "unet3D":
+    # If a 3D architecture was trained, use a 3D test generator instead.
     test_gen = data.test_generator_3D(f"{args.dir}/test/image", num_image=args.tests)
     results = model.predict_generator(test_gen, args.tests, verbose=1)
+    # Use the custom save_result() method defined in data.py to save the results as
+    # greyscale .png images.
     data.save_result("test", results)
 else:
     test_gen = data.test_generator(f"{args.dir}/test/image", num_image=args.tests, target_size=(args.size, args.size))
     results = model.predict_generator(test_gen, args.tests, verbose=1)
+    # Use the custom save_result() method defined in data.py to save the results as
+    # greyscale .png images.
     data.save_result("test", results)
